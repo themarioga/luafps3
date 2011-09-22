@@ -1,6 +1,6 @@
 #include "../functions.h"
-
-toPush(Dir, BrowserData)
+#include "../filebrowser.h"
+#include <lv2/sysfs.h>
 
 static int lua_systemSleep(lua_State *i) {
 if (lua_gettop(l) != 1) return luaL_error(l, "wrong number of arguments");
@@ -91,37 +91,43 @@ static int lua_moveFile(lua_State *l) {
 	rename(path1,path2);
 	return 0;
 }
+int maxbrow;
 static int lua_getdir (lua_State *L) {
-	if (lua_gettop(l) != 1) return luaL_error(l, "wrong number of arguments");
-	const char *path = luaL_checkstring(l, 1);
-	BrowserData dir = dirIter(path);
-	BrowserData* buffer = pushDir(l);
-	*buffer = dir;
+	if (lua_gettop(l) == 0) {
+		if (!maxbrow) {
+			maxbrow = BrowseDevice();
+		}
+	} else {
+		int i = luaL_checkint(l, 1);
+		browser.selIndex = i;
+		maxbrow = BrowserChangeFolder();
+	}
     return 1;
 }
 static int lua_getnumdir (lua_State *L) {
 	if (lua_gettop(l) != 0) return luaL_error(l, "wrong number of arguments");
-	BrowserData dir = *toDir(l, 1);
-	lua_pushnumber(l, dir.maxbrow);
+	lua_pushnumber(l, maxbrow);
     return 1;
 }
 static int lua_getname (lua_State *L) {
 	if (lua_gettop(l) != 1) return luaL_error(l, "wrong number of arguments");
-	BrowserData dir = *toDir(l, 1);
-	lua_pushstring(l, dirGetItem(dir).file);
+	int i = luaL_checkint(l, 1);
+	char *filename = browserList[i].displayname;
+	lua_pushstring(l, filename);
     return 1;
 }
 static int lua_gettype (lua_State *L) {
 	if (lua_gettop(l) != 1) return luaL_error(l, "wrong number of arguments");
-	BrowserData dir = *toDir(l, 1);
-	lua_pushnumber(l, dirGetItem(dir).type);
+	int i = luaL_checkint(l, 1);
+	int isdir = browserList[i].isdir;
+	lua_pushnumber(l, isdir);
     return 1;
 }
 static int lua_isext (lua_State *L) {
 	if (lua_gettop(l) != 2) return luaL_error(l, "wrong number of arguments");
-	BrowserData dir = *toDir(l, 1);
-	const char *exten = luaL_checkstring(l, 2);
-	char *res = strstr(dirGetItem(dir).ext, exten);
+	const char *exten = luaL_checkstring(l, 1);
+	int i = luaL_checkint(l, 2);
+	char *res = strstr(browserList[i].filename, exten);
 	if (res) {
 		lua_pushnumber(l, 1);
 	} else {
@@ -129,16 +135,26 @@ static int lua_isext (lua_State *L) {
 	}
     return 1;
 }
+static int lua_pathDir (lua_State *L) {
+	if (lua_gettop(l) != 0 && lua_gettop(l) != 1) return luaL_error(l, "wrong number of arguments");
+	if (lua_gettop(l) != 0) {
+		lua_pushstring(l, browser.dir);
+	} else {
+		sprintf(browser.dir, lua_tostring(l, 1));
+	}
+    return 1;
+}
 
 static const struct luaL_reg System[] = {
 	{"sleep",lua_systemSleep},
 	{"getDir",lua_getdir},
-	{"getDName",lua_getname},
-	{"getDType",lua_gettype},
-	{"isDExt",lua_isext},
+	{"getName",lua_getname},
+	{"getType",lua_gettype},
+	{"isExt",lua_isext},
 	{"getMaxDir",lua_getnumdir},
-	{"setChmod",lua_chmod},
+	{"getPathDir",lua_pathDir},
 	{"currentDir",lua_curdir},
+	{"setChmod",lua_chmod},
 	{"createDir",lua_createDir},
 	{"removeDir",lua_removeDir},
 	{"checkFile",lua_checkFile}, //Cambiado
