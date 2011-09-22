@@ -14,7 +14,6 @@
 #include <unistd.h>
 #include <malloc.h>
 #include <math.h>
-#include <filebrowser.h>
 // SDL includes
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>

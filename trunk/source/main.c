@@ -3,6 +3,7 @@
 extern int luaopen_Screen(lua_State *l);
 extern int luaopen_Controls(lua_State *l);
 extern int luaopen_Timer(lua_State *l);
+extern int luaopen_System(lua_State *l);
 
 int main(int argc, char *argv[]) {
 	InitSDL();
@@ -11,6 +12,7 @@ int main(int argc, char *argv[]) {
 	luaopen_Screen(l);
 	luaopen_Controls(l);
 	luaopen_Timer(l);
+	luaopen_System(l);
 	SDL_Surface *image = IMG_Load("/dev_hdd0/game/LUAFPS310/USRDIR/contest_splash.png");
 	if (image) {
 		apply_surface(0,0, image, screen, NULL);
@@ -40,3 +42,4 @@ int main(int argc, char *argv[]) {
 	lua_close(l);
 	return 0;
 }
+
