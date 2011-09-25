@@ -41,3 +41,4 @@ void free_surf(SDL_Surface* surf);
 void apply_surface(int x, int y, SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip);
 void fontPrintf(int x, int y, const char *format, ...);
 padData getPadData() ;
+void writeToLog(const char *text, ...);
