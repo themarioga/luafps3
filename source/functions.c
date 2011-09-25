@@ -5,6 +5,18 @@ TTF_Font *errorfont;
 SDL_Surface *error_text_surface;
 const SDL_VideoInfo *dispinfo;
 
+void writeToLog(const char *text, ...) {
+    va_list opt;
+	FILE *pFile;
+    char buff[2048];
+    va_start(opt, text);
+    vsnprintf(buff, sizeof(buff), text, opt);
+    va_end(opt);
+	pFile = fopen("/dev_usb000/log.txt","a+");
+	fputs(buff,pFile);
+    fclose(pFile);
+}
+
 static void sys_callback(uint64_t status, uint64_t param, void* userdata) {
 	switch (status) {
 		case SYSUTIL_EXIT_GAME:

@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <dirent.h>
 #include <malloc.h>
 
@@ -95,7 +96,6 @@ int FileSortCallback(const void *f1, const void *f2) { /* Special case for impli
 int ParseDirectory() {
 	DIR *dir = NULL;
 	char fulldir[MAXPATHLEN];
-	char filename[MAXPATHLEN];
 	struct dirent *filestat;
 	// reset browser
 	ResetBrowser();
@@ -113,7 +113,7 @@ int ParseDirectory() {
 	// index files/folders
 	int entryNum = 0;
 	while((filestat = readdir(dir))) {
-		if(strcmp(filename,".") != 0) {
+		if(strcmp(filestat->d_name,".") != 0) {
 			BROWSERENTRY * newBrowserList = (BROWSERENTRY *)realloc(browserList, (entryNum+1) * sizeof(BROWSERENTRY));
 			if(!newBrowserList) { // failed to allocate required memory
 				ResetBrowser();
@@ -124,7 +124,7 @@ int ParseDirectory() {
 			}
 			memset(&(browserList[entryNum]), 0, sizeof(BROWSERENTRY)); // clear the new entry
 			strncpy(browserList[entryNum].filename, filestat->d_name, MAXJOLIET);
-			if(strcmp(filename,"..") == 0) {
+			if(strcmp(filestat->d_name,"..") == 0) {
 				sprintf(browserList[entryNum].displayname, "Up One Level");
 			} else {
 				strncpy(browserList[entryNum].displayname, filestat->d_name, MAXDISPLAY);	// crop name for display
